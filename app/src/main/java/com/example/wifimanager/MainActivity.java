@@ -122,9 +122,6 @@ public class MainActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        mAdapter = new WifiRVAdapter(arrayList);
-        recyclerView.setAdapter(mAdapter);
-
         //초기 셋팅 과정
         requestRuntimePermission();
 //        temp_str = "temp_str";
@@ -193,6 +190,10 @@ public class MainActivity extends AppCompatActivity {
                 wifiManager.startScan();
                 isWifiScan = true;
                 arrayList.add(dataset);
+                mAdapter = new WifiRVAdapter(arrayList);
+                recyclerView.setAdapter(mAdapter);
+                mAdapter.notifyDataSetChanged();
+
             } else {
                 Toast.makeText(getApplicationContext(),
                         "Location access 권한이 없습니다..", Toast.LENGTH_LONG).show();
