@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private Spinner placeName;
     private String temp_str;
     private String[] str_placeName;
+
+    String[] dataset;
     ArrayList<String[]> arrayList;
     ArrayAdapter<String> arrayAdapter;
 
@@ -59,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    String[] dataset;
+
 
     private void getWifiInfo() {
         if (!doneWifiScan) { // wifiScan을 한 경우에만 getScanResult를 사용하도록 flag 변수 구현
@@ -114,9 +118,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EditText editText = findViewById(R.id.placename_et);
-        editText.getText().toString();
-        dataset[4] = String.valueOf(editText);
 
         recyclerView = findViewById(R.id.wifi_sensor_rv);
         layoutManager = new LinearLayoutManager(this);
@@ -189,6 +190,9 @@ public class MainActivity extends AppCompatActivity {
                 // wifi 스캔 시작
                 wifiManager.startScan();
                 isWifiScan = true;
+
+                EditText editText = findViewById(R.id.placename_et);
+                dataset[4] = editText.getText().toString();
                 arrayList.add(dataset);
                 mAdapter = new WifiRVAdapter(arrayList);
                 recyclerView.setAdapter(mAdapter);
