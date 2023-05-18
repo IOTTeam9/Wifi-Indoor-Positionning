@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -19,12 +21,23 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -140,6 +153,16 @@ public class MainActivity extends AppCompatActivity {
 
         mAdapter = new WifiRVAdapter(arrayList);
         recyclerView.setAdapter(mAdapter);
+
+        //버튼 클릭시 엑셀 파일 추출
+        FloatingActionButton fb = findViewById(R.id.excel_fb);
+        fb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveExcel();
+            }
+        });
+
 
         //초기 셋팅 과정
         requestRuntimePermission();
@@ -312,5 +335,60 @@ public class MainActivity extends AppCompatActivity {
             // other 'case' lines to check for other
             // permissions this app might request
         }
+    }
+
+    //엑셀 파일 추출
+    private void saveExcel(){
+        Workbook workbook = new HSSFWorkbook();
+
+        Sheet sheet = workbook.createSheet(); // 새로운 시트 생성
+
+        Row row = sheet.createRow(0); // 새로운 행 생성
+        Cell cell;
+
+        cell = row.createCell(0); // 1번 셀 생성
+        cell.setCellValue("SSID"); // 1번 셀 값 입력
+
+        cell = row.createCell(1); // 2번 셀 생성
+        cell.setCellValue("BSSID"); // 2번 셀 값 입력
+
+        cell = row.createCell(2); // 3번 셀 생성
+        cell.setCellValue("RSSI"); // 3번 셀 값 입력
+
+        cell = row.createCell(3); // 3번 셀 생성
+        cell.setCellValue("위치"); // 3번 셀 값 입력
+
+        for(int i = 0; i < arrayList.size(); i++){ // 데이터 엑셀에 입력
+            row = sheet.createRow(i+1);
+            cell = row.createCell(0);
+            cell.setCellValue(arrayList.get(i)[0]);
+            cell = row.createCell(1);
+            cell.setCellValue(arrayList.get(i)[1]);
+            cell = row.createCell(2);
+            cell.setCellValue(arrayList.get(i)[2]);
+            cell = row.createCell(3);
+            cell.setCellValue(arrayList.get(i)[3]);
+        }
+
+        String fileName = "test.xls";
+        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File xlsFile = new File(downloadDir, fileName);
+
+// FileProvider를 사용하여 파일에 대한 안전한 URI 생성
+        Uri xlsUri = FileProvider.getUriForFile(this, "com.example.yourapp.fileprovider", xlsFile);
+
+        try{
+            FileOutputStream os = new FileOutputStream(xlsFile);
+            workbook.write(os); // 외부 저장소에 엑셀 파일 생성
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        Toast.makeText(getApplicationContext(),xlsFile.getAbsolutePath()+"에 저장되었습니다",Toast.LENGTH_SHORT).show();
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("application/vnd.ms-excel");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, xlsUri);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(shareIntent, "Share Excel File"));
     }
 }

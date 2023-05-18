@@ -54,6 +54,17 @@
         app:layout_constraintEnd_toEndOf="@id/start"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/excel_fb"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:backgroundTint="@color/purple_700"
+        app:rippleColor="@color/lightgray"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 
 <!--    <LinearLayout-->
 <!--        android:layout_width="fill_parent"-->
