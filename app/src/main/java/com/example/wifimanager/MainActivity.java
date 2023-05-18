@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -30,7 +31,9 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
+
+    ArrayList<String[]> arrayList;
+    private WifiRVAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
     boolean isPermitted = false;
@@ -49,9 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private Spinner placeName;
     private String temp_str;
     private String[] str_placeName;
+    private EditText editText;
 
-    String[] dataset;
-    ArrayList<String[]> arrayList;
     ArrayAdapter<String> arrayAdapter;
 
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -85,9 +87,20 @@ public class MainActivity extends AppCompatActivity {
             scanResultList = wifiManager.getScanResults();
 
             ScanResult result = scanResultList.get(0);
-            dataset[0] = result.SSID;
-            dataset[1] = result.BSSID;
+
+            String[] dataset = new String[4];
+
+            dataset[0] = String.valueOf(result.SSID);
+            dataset[1] = String.valueOf(result.BSSID);
             dataset[2] = String.valueOf(result.level);
+
+            editText = findViewById(R.id.placename_et);
+            dataset[3] = editText.getText().toString();
+
+            if(dataset != null) {
+                arrayList.add(dataset);
+            }
+            mAdapter.notifyDataSetChanged();
 
 
 //            String str;
@@ -122,6 +135,11 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.wifi_sensor_rv);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+
+        arrayList = new ArrayList<>();
+
+        mAdapter = new WifiRVAdapter(arrayList);
+        recyclerView.setAdapter(mAdapter);
 
         //초기 셋팅 과정
         requestRuntimePermission();
@@ -190,13 +208,6 @@ public class MainActivity extends AppCompatActivity {
                 // wifi 스캔 시작
                 wifiManager.startScan();
                 isWifiScan = true;
-
-                EditText editText = findViewById(R.id.placename_et);
-                dataset[4] = editText.getText().toString();
-                arrayList.add(dataset);
-                mAdapter = new WifiRVAdapter(arrayList);
-                recyclerView.setAdapter(mAdapter);
-                mAdapter.notifyDataSetChanged();
 
             } else {
                 Toast.makeText(getApplicationContext(),

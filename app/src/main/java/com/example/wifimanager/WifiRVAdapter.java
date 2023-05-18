@@ -14,6 +14,7 @@ public class WifiRVAdapter extends RecyclerView.Adapter<WifiRVAdapter.MyViewHold
 
     private ArrayList<String[]> dataset;
 
+
     public WifiRVAdapter(ArrayList<String[]> arrayList) {
         dataset = arrayList;
     }
@@ -30,7 +31,7 @@ public class WifiRVAdapter extends RecyclerView.Adapter<WifiRVAdapter.MyViewHold
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.wifinametv.setText(dataset.get(position)[4]);
+        holder.wifinametv.setText(dataset.get(position)[3]);
         holder.ssidtv.setText(dataset.get(position)[0]);
         holder.bssidtv.setText(dataset.get(position)[1]);
         holder.rssi.setText(dataset.get(position)[2]);
@@ -50,7 +51,7 @@ public class WifiRVAdapter extends RecyclerView.Adapter<WifiRVAdapter.MyViewHold
             wifinametv = v.findViewById(R.id.placerv_tv);
             ssidtv = v.findViewById(R.id.ssidrv_tv);
             bssidtv = v.findViewById(R.id.bssidrv_tv);
-            rssi = v.findViewById(R.id.rssi_tv);
+            rssi = v.findViewById(R.id.rssirv_tv);
         }
     }
 
