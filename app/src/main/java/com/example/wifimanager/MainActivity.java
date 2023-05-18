@@ -8,10 +8,9 @@ import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,12 +18,18 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     boolean isPermitted = false;
     boolean isWifiScan = false;
@@ -42,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private Spinner placeName;
     private String temp_str;
     private String[] str_placeName;
-    ArrayList<String> arrayList;
+    ArrayList<String[]> arrayList;
     ArrayAdapter<String> arrayAdapter;
 
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -54,14 +59,15 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    String[] dataset;
 
     private void getWifiInfo() {
         if (!doneWifiScan) { // wifiScan을 한 경우에만 getScanResult를 사용하도록 flag 변수 구현
-            int num = -1;
-            // num에 선택된 spinner를 체크해서 넣어준다.
-            if (temp_str.equals("AP1")) num = 0;
-            else if (temp_str.equals("AP2")) num = 1;
-            else num = 2;
+//            int num = -1;
+//            // num에 선택된 spinner를 체크해서 넣어준다.
+//            if (temp_str.equals("AP1")) num = 0;
+//            else if (temp_str.equals("AP2")) num = 1;
+//            else num = 2;
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -74,24 +80,31 @@ public class MainActivity extends AppCompatActivity {
             }
             scanResultList = wifiManager.getScanResults();
 
-            String str;
-            //중복되지 않게 해당 num번째 배열에 AP정보들을 집어넣는다.
-            for (int i = 1; i < scanResultList.size(); i++) {
-                ScanResult result = scanResultList.get(i);
-                // 화면의 TextView에 SSID와 BSSID를 이어붙여서 텍스트로 표시
-                Log.d("RESULT", "RESULT OK");
-                Log.d("RESULT", result.BSSID);
-                str = "SSID : " + result.SSID + ", BSSID : " + result.BSSID + "\n RSSI : " + result.level;
-                if(!top10APId[num].contains(str)) top10APId[num].add(str);
-            }
+            ScanResult result = scanResultList.get(0);
+            dataset[0] = result.SSID;
+            dataset[1] = result.BSSID;
+            dataset[2] = String.valueOf(result.level);
+
+
+//            String str;
+//            //중복되지 않게 해당 num번째 배열에 AP정보들을 집어넣는다.
+//            for (int i = 1; i < scanResultList.size(); i++) {
+//                ScanResult result = scanResultList.get(i);
+//                // 화면의 TextView에 SSID와 BSSID를 이어붙여서 텍스트로 표시
+//                //Log.d("RESULT", "RESULT OK");
+//                //Log.d("RESULT", result.BSSID);
+//                str = "SSID : " + result.SSID + ", BSSID : " + result.BSSID + "\n RSSI : " + result.level;
+//                if(!top10APId[num].contains(str)) top10APId[num].add(str);
+//            }
+//
             //모두 처리되고 나면 가장 처음 들어온 AP의 SSID+BSSID를 text로 뿌려준다.
-            if (num == 0) {
-                ap1.setText(top10APId[num].get(0));
-            } else if (num == 1) {
-                ap2.setText(top10APId[num].get(0));
-            } else {
-                ap3.setText(top10APId[num].get(0));
-            }
+//            if (num == 0) {
+//                ap1.setText(top10APId[num].get(0));
+//            } else if (num == 1) {
+//                ap2.setText(top10APId[num].get(0));
+//            } else {
+//                ap3.setText(top10APId[num].get(0));
+//            }
             doneWifiScan = true;
         }
     }
@@ -101,40 +114,51 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        EditText editText = findViewById(R.id.placename_et);
+        editText.getText().toString();
+        dataset[4] = String.valueOf(editText);
+
+        recyclerView = findViewById(R.id.wifi_sensor_rv);
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+
+        mAdapter = new WifiRVAdapter(arrayList);
+        recyclerView.setAdapter(mAdapter);
+
         //초기 셋팅 과정
         requestRuntimePermission();
-        temp_str = "temp_str";
-        str_placeName = new String[3];
-        top10APId = new ArrayList[3];
-        for(int i=0; i<3; i++)
-            top10APId[i] = new ArrayList<String>();
+//        temp_str = "temp_str";
+//        str_placeName = new String[3];
+//        top10APId = new ArrayList[3];
+//        for(int i=0; i<3; i++)
+//            top10APId[i] = new ArrayList<String>();
 
-        ap1 = (TextView)findViewById(R.id.ap1);
-        ap2 = (TextView)findViewById(R.id.ap2);
-        ap3 = (TextView)findViewById(R.id.ap3);
-        placeName = (Spinner)findViewById(R.id.placeName);
+//        ap1 = (TextView)findViewById(R.id.ap1);
+//        ap2 = (TextView)findViewById(R.id.ap2);
+//        ap3 = (TextView)findViewById(R.id.ap3);
+//        placeName = (Spinner)findViewById(R.id.placeName);
 
-        arrayList = new ArrayList<>();
-        arrayList.add("AP1");
-        arrayList.add("AP2");
-        arrayList.add("AP3");
+//        arrayList = new ArrayList<>();
+//        arrayList.add("AP1");
+//        arrayList.add("AP2");
+//        arrayList.add("AP3");
 
         //Spinner 연결 설정
-        arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, arrayList);
-        placeName.setAdapter(arrayAdapter);
-        placeName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                str_placeName[i] = arrayList.get(i);
-                temp_str = str_placeName[i];
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-        placeName.setSelection(0);
+//        arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, arrayList);
+//        placeName.setAdapter(arrayAdapter);
+//        placeName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//                str_placeName[i] = arrayList.get(i);
+//                temp_str = str_placeName[i];
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> adapterView) {
+//
+//            }
+//        });
+//        placeName.setSelection(0);
 
         wifiManager = (WifiManager)getApplicationContext().getSystemService(WIFI_SERVICE);
         if(wifiManager.isWifiEnabled() == false)
@@ -168,44 +192,45 @@ public class MainActivity extends AppCompatActivity {
                 // wifi 스캔 시작
                 wifiManager.startScan();
                 isWifiScan = true;
+                arrayList.add(dataset);
             } else {
                 Toast.makeText(getApplicationContext(),
                         "Location access 권한이 없습니다..", Toast.LENGTH_LONG).show();
             }
         }
-        else if(view.getId() == R.id.startAlert) {
-            // Start proximity alert 버튼이 눌렸을 때
-
-            // placeName이라는 변수로 참조하는 EditText에 쓰여진 장소 이름으로 proximity alert을 등록한다
-
-            // proximity alert을 주는 것은 Service로 구현
-            // Service를 AlertService라는 이름의 클래스로 구현하고 startService 메소드를 호출하여 이 Service를 시작
-
-            if(str_placeName.equals("")) { //Spinner 선택 했는지 검사
-                Toast.makeText(this, "Please select place name first.", Toast.LENGTH_LONG).show();
-            }
-            else if(!isWifiScan){ //WIfiScan 했는지 검사
-                Toast.makeText(this, "Wifi-Scan first!!", Toast.LENGTH_LONG).show();
-            }
-            else { // 결과값들을 Service로 보낸다.
-                Intent intent = new Intent(this, AlertService.class);
-                intent.putExtra("place", str_placeName);
-                intent.putStringArrayListExtra("ap1id", top10APId[0]);
-                intent.putStringArrayListExtra("ap2id", top10APId[1]);
-                intent.putStringArrayListExtra("ap3id", top10APId[2]);
-                // 위에서 key 값으로 쓰인 String 값은 여러 곳에서 반복해서 사용된다면
-                // String 상수로 정의해 놓고 사용하는 것이 좋음
-                // 이 예제에서는 AlertService에서 쓰임
-
-                startService(intent);
-            }
-        }
-        else if(view.getId() == R.id.stopAlert) {
-            // Stop proximity alert 버튼이 눌렸을 때
-
-            // AlertService 동작을 중단
-            stopService(new Intent(this, AlertService.class));
-        }
+//        else if(view.getId() == R.id.startAlert) {
+//            // Start proximity alert 버튼이 눌렸을 때
+//
+//            // placeName이라는 변수로 참조하는 EditText에 쓰여진 장소 이름으로 proximity alert을 등록한다
+//
+//            // proximity alert을 주는 것은 Service로 구현
+//            // Service를 AlertService라는 이름의 클래스로 구현하고 startService 메소드를 호출하여 이 Service를 시작
+//
+//            if(str_placeName.equals("")) { //Spinner 선택 했는지 검사
+//                Toast.makeText(this, "Please select place name first.", Toast.LENGTH_LONG).show();
+//            }
+//            else if(!isWifiScan){ //WIfiScan 했는지 검사
+//                Toast.makeText(this, "Wifi-Scan first!!", Toast.LENGTH_LONG).show();
+//            }
+//            else { // 결과값들을 Service로 보낸다.
+//                Intent intent = new Intent(this, AlertService.class);
+//                intent.putExtra("place", str_placeName);
+//                intent.putStringArrayListExtra("ap1id", top10APId[0]);
+//                intent.putStringArrayListExtra("ap2id", top10APId[1]);
+//                intent.putStringArrayListExtra("ap3id", top10APId[2]);
+//                // 위에서 key 값으로 쓰인 String 값은 여러 곳에서 반복해서 사용된다면
+//                // String 상수로 정의해 놓고 사용하는 것이 좋음
+//                // 이 예제에서는 AlertService에서 쓰임
+//
+//                startService(intent);
+//            }
+//        }
+//        else if(view.getId() == R.id.stopAlert) {
+//            // Stop proximity alert 버튼이 눌렸을 때
+//
+//            // AlertService 동작을 중단
+//            stopService(new Intent(this, AlertService.class));
+//        }
     }
 
     private void requestRuntimePermission() {
