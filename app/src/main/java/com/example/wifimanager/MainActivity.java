@@ -101,6 +101,9 @@ public class MainActivity extends AppCompatActivity {
             }
             scanResultList = wifiManager.getScanResults();
 
+            temp = new ArrayList<>();
+            rssi = new ArrayList<>();
+
             for(int i = 0; i < scanResultList.size(); i++){
                 ScanResult result = scanResultList.get(i);
                 String[] dataset = new String[4];
@@ -110,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 dataset[2] = String.valueOf(result.level);
                 editText = findViewById(R.id.placename_et);
                 dataset[3] = editText.getText().toString();
+                Log.d("SCAN NAME", dataset[3]);
 
                 Integer[] temp2 = new Integer[2];
                 temp2[0] = i;
@@ -126,10 +130,13 @@ public class MainActivity extends AppCompatActivity {
 
             rssi.sort((o1, o2) -> o2[1] - o1[1]);
 
+
             for(int i = 0; i < 3; i++){
                 int index = rssi.get(i)[0];
 
-                arrayList.add(temp.get(index));
+                Log.d("RESULT", temp.get(index)[3]);
+
+                arrayList.add(0, temp.get(index));
             }
 
             mAdapter.notifyDataSetChanged();
@@ -169,8 +176,6 @@ public class MainActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        temp = new ArrayList<>();
-        rssi = new ArrayList<>();
         arrayList = new ArrayList<>();
 
         mAdapter = new WifiRVAdapter(arrayList);
