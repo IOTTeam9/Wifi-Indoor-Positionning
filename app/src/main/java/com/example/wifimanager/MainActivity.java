@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     TextView ap2;
     TextView ap3;
     ArrayList<String> top10APId[];
+    ArrayList<String[]> temp;
+    ArrayList<Integer[]> rssi;
 
     WifiManager wifiManager;
     List<ScanResult> scanResultList;
@@ -99,21 +101,39 @@ public class MainActivity extends AppCompatActivity {
             }
             scanResultList = wifiManager.getScanResults();
 
-            ScanResult result = scanResultList.get(0);
+            for(int i = 0; i < scanResultList.size(); i++){
+                ScanResult result = scanResultList.get(i);
+                String[] dataset = new String[4];
 
-            String[] dataset = new String[4];
+                dataset[0] = String.valueOf(result.SSID);
+                dataset[1] = String.valueOf(result.BSSID);
+                dataset[2] = String.valueOf(result.level);
+                editText = findViewById(R.id.placename_et);
+                dataset[3] = editText.getText().toString();
 
-            dataset[0] = String.valueOf(result.SSID);
-            dataset[1] = String.valueOf(result.BSSID);
-            dataset[2] = String.valueOf(result.level);
+                Integer[] temp2 = new Integer[2];
+                temp2[0] = i;
+                temp2[1] = result.level;
 
-            editText = findViewById(R.id.placename_et);
-            dataset[3] = editText.getText().toString();
+                temp.add(dataset);
+                rssi.add(temp2);
 
-            if(dataset != null) {
-                arrayList.add(dataset);
+//                if(dataset != null) {
+//                    arrayList.add(dataset);
+//                }
+//                mAdapter.notifyDataSetChanged();
             }
+
+            rssi.sort((o1, o2) -> o2[1] - o1[1]);
+
+            for(int i = 0; i < 3; i++){
+                int index = rssi.get(i)[0];
+
+                arrayList.add(temp.get(index));
+            }
+
             mAdapter.notifyDataSetChanged();
+
 
 
 //            String str;
@@ -149,6 +169,8 @@ public class MainActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
+        temp = new ArrayList<>();
+        rssi = new ArrayList<>();
         arrayList = new ArrayList<>();
 
         mAdapter = new WifiRVAdapter(arrayList);
