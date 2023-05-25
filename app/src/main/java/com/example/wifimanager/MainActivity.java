@@ -113,7 +113,10 @@ public class MainActivity extends AppCompatActivity {
                 dataset[2] = String.valueOf(result.level);
                 editText = findViewById(R.id.placename_et);
                 dataset[3] = editText.getText().toString();
-                Log.d("SCAN NAME", dataset[3]);
+
+                Log.d("WIFI NAME !! : ", dataset[0]);
+                Log.d("WIFI MAC!! : ", dataset[1]);
+                Log.d("RSSI LEVEL!! : ", dataset[2]);
 
                 Integer[] temp2 = new Integer[2];
                 temp2[0] = i;
@@ -130,12 +133,8 @@ public class MainActivity extends AppCompatActivity {
 
             rssi.sort((o1, o2) -> o2[1] - o1[1]);
 
-
-            for(int i = 0; i < 3; i++){
+            for(int i = 0; i < rssi.size(); i++){
                 int index = rssi.get(i)[0];
-
-                Log.d("RESULT", temp.get(index)[3]);
-
                 arrayList.add(0, temp.get(index));
             }
 
