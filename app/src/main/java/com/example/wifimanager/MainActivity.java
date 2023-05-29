@@ -41,11 +41,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
 
     ArrayList<String[]> arrayList;
+    List<Location> locationList = new ArrayList<>();
     private WifiRVAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
@@ -108,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 ScanResult result = scanResultList.get(i);
                 String[] dataset = new String[4];
 
+                // dataset에 SSID, BSSID, RSSI, Place를 순서대로 저장
                 dataset[0] = String.valueOf(result.SSID);
                 dataset[1] = String.valueOf(result.BSSID);
                 dataset[2] = String.valueOf(result.level);
@@ -185,7 +193,9 @@ public class MainActivity extends AppCompatActivity {
         fb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveExcel();
+                transformDataList(arrayList);
+                sendData(locationList);
+//                saveExcel();
             }
         });
 
@@ -416,5 +426,45 @@ public class MainActivity extends AppCompatActivity {
         shareIntent.putExtra(Intent.EXTRA_STREAM, xlsUri);
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, "Share Excel File"));
+    }
+
+    public List<Location> transformDataList(ArrayList<String[]> arrayList) {
+
+        for(int i = 0; i < arrayList.size(); i++) {
+            locationList.add(new Location(arrayList.get(i)[0], arrayList.get(i)[1], Integer.parseInt(arrayList.get(i)[2]), arrayList.get(i)[3]));
+        }
+
+        return locationList;
+    }
+
+    private void sendData(List<Location> locationList) {
+
+        String BASE_URL = "https://cha-conne.kro.kr";
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        LocationRetrofitInterface retrofitAPI = retrofit.create(LocationRetrofitInterface.class);
+
+        // sendLocation API 호출
+        retrofitAPI.sendLocation(locationList).enqueue(new Callback<NavigationResponse>() {
+            @Override
+            public void onResponse(Call<NavigationResponse> call, Response<NavigationResponse> response) {
+                if(response.isSuccessful()) {
+                    NavigationResponse resp = response.body();
+                    Log.d("SUCCESS", resp.getMessage());
+                    Toast.makeText(getApplicationContext(), "데이터 전송이 완료되었습니다.", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NavigationResponse> call, Throwable t) {
+                Log.d("FAILURE", t.getMessage());
+                Toast.makeText(getApplicationContext(), "데이터 전송에 실패하였습니다.", Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 }
